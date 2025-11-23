@@ -23,12 +23,18 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 from flask_wtf.csrf import CSRFProtect
 
+# PDF optimization library
+import pikepdf
+
 # Initialize Flask application
 app = Flask(__name__)
 
 # Configuration
 # IMPORTANT: For production, set SECRET_KEY as an environment variable for security
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-default-secret-key-for-local-development')
+
+# Max upload file size: 120MB (125,829,120 bytes)
+app.config['MAX_CONTENT_LENGTH'] = 120 * 1024 * 1024
 
 # CRITICAL: Use absolute paths for file uploads
 # This gets the directory where app.py is located
@@ -204,6 +210,26 @@ def upload_file():
     filename = secure_filename(f"{unique_prefix}_{file.filename}")
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
+
+    # Optimize and linearize PDF for fast web viewing
+    try:
+        # Open the saved PDF file
+        pdf = pikepdf.open(filepath)
+        
+        # Add metadata to the PDF
+        with pdf.open_metadata() as meta:
+            meta['dc:title'] = f"{data['class_name']} - {data['subject']} (Sem {data['semester']})"
+            meta['dc:creator'] = data['uploader_name']
+            meta['dc:description'] = f"University: {data['university']}, Year: {data['exam_year']}, Type: {data['exam_type']}, Time: {data['time']}, Marks: {data['max_marks']}"
+        
+        # Save with linearization enabled (Fast Web View)
+        # This allows PDFs to load page-by-page in browsers instead of downloading entire file first
+        pdf.save(filepath, linearize=True)
+        pdf.close()
+        
+    except Exception as e:
+        print(f"PDF Optimization Warning: Could not linearize PDF - {e}")
+        # Continue even if optimization fails - upload shouldn't fail due to optimization issues
 
     # Insert metadata into database
     try:
