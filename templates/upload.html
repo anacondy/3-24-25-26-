@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Multi-File Upload</title>
+    
+    <!-- CSRF token meta tag for secure AJAX uploads -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Inline styles for upload dashboard -->
     <style>
         :root { --primary-color: #4CAF50; --bg-color-1: #1a1a1a; --bg-color-2: #2a2a2a; --bg-color-3: #333; --border-color: #555; --text-color: #e0e0e0; --error-color: #d9534f; }
         body { font-family: sans-serif; background-color: var(--bg-color-1); color: var(--text-color); margin: 0; padding: 2rem; }
@@ -24,6 +28,7 @@
     </style>
 </head>
 <body>
+    <!-- Drag and drop zone for PDF files -->
     <div class="upload-container" id="drop-zone">
         <p>Drag & Drop PDF files here</p>
         <p>or</p>
@@ -31,13 +36,16 @@
         <label for="file-input" style="cursor: pointer; background-color: var(--primary-color); color: white; padding: 10px 15px; border-radius: 4px;">Select Files</label>
     </div>
 
+    <!-- Upload controls -->
     <div class="upload-controls">
         <button id="upload-all-btn">Upload All Pending Files</button>
     </div>
 
+    <!-- Container for dynamically generated form cards -->
     <div id="forms-wrapper">
         </div>
 
+    <!-- Hidden datalists for autocomplete suggestions -->
     <div class="hidden-datalists">
         <datalist id="universities"> <option value="University of Rajasthan"></option> <option value="S.S Jain Subodh (Auto) College"></option> </datalist>
         <datalist id="paper_counts"> <option value="First Paper (1)"></option> <option value="Second Paper (2)"></option> <option value="Third Paper (3)"></option> <option value="Fourth Paper (4)"></option> <option value="Fifth Paper (5)"></option> </datalist>
@@ -46,6 +54,7 @@
         <datalist id="marks"> <option value="20"></option> <option value="54"></option> <option value="80"></option> <option value="100"></option> </datalist>
     </div>
 
+    <!-- Upload handling script -->
     <script src="{{ url_for('static', filename='upload.js') }}"></script>
 </body>
 </html>

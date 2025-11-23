@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Login</title>
+    
+    <!-- CSRF token meta tag for form security -->
     <style>
         :root { --primary-color: #4CAF50; --bg-color-1: #1a1a1a; --bg-color-2: #2a2a2a; --bg-color-3: #333; --border-color: #555; --text-color: #e0e0e0; --error-color: #d9534f; }
         body { font-family: sans-serif; background-color: var(--bg-color-1); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
@@ -16,18 +18,29 @@
     </style>
 </head>
 <body>
+    <!-- Login form with CSRF protection -->
     <form method="post">
+        <!-- CSRF token for security -->
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
         <h1>Admin Login</h1>
+        
+        <!-- Flash messages for login errors -->
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <div class="flash-error">{{ messages[0] }}</div>
             {% endif %}
         {% endwith %}
+        
+        <!-- Username field -->
         <label for="username">Username:</label>
         <input type="text" name="username" id="username" required autofocus>
+        
+        <!-- Password field -->
         <label for="password">Password:</label>
         <input type="password" name="password" id="password" required>
+        
+        <!-- Submit button -->
         <input type="submit" value="Log In">
     </form>
 </body>
