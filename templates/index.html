@@ -4,21 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terminal | Previous Year Papers</title>
+    
+    <!-- Main stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <!-- Fira Code monospace font for terminal aesthetic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body class="theme-green">
 
+    <!-- Mobile search container (shown at bottom on mobile devices) -->
     <div id="mobile-search-container">
         <input type="text" id="mobile-search-input" placeholder="Search papers...">
     </div>
 
+    <!-- Terminal output container -->
     <div id="terminal">
         <div id="output"></div>
     </div>
 
+    <!-- Desktop search modal (triggered by Ctrl+K) -->
     <div id="search-modal" class="hidden">
         <div class="search-box">
             <label for="search-input">Search Database (Ctrl+K)</label>
@@ -27,6 +34,7 @@
         </div>
     </div>
 
+    <!-- Main script for terminal interface and search -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

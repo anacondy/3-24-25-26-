@@ -1,34 +1,105 @@
+/**
+ * Terminal Archives - Upload Script
+ * ==================================
+ * Handles drag-and-drop file upload, form validation, and batch uploads.
+ * Manages the admin dashboard upload functionality.
+ * 
+ * Features:
+ * - Drag and drop multiple PDF files
+ * - Dynamic form card generation for each file
+ * - Real-time validation
+ * - Batch upload with progress tracking
+ * - Keyboard navigation between form cards
+ * - CSRF token protection
+ * 
+ * Author: Alvido
+ * Last Updated: 2025
+ */
+
 document.addEventListener('DOMContentLoaded', function () {
+    // DOM element references
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const formsWrapper = document.getElementById('forms-wrapper');
     const uploadAllBtn = document.getElementById('upload-all-btn');
 
-    // --- NEW: Get the CSRF token from the meta tag ---
+    // Get the CSRF token from meta tag for secure form submission
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+    // Map to track added files and prevent duplicates
+    // Key: "filename-filesize", Value: {file, card, uploaded}
     let addedFiles = new Map();
+    // ========== Event Listeners ==========
+    
+    /**
+     * Dragover event - prevent default and show visual feedback
+     */
+    dropZone.addEventListener('dragover', (e) => { 
+        e.preventDefault(); 
+        dropZone.classList.add('drag-over'); 
+    });
+    
+    /**
+     * Dragleave event - remove visual feedback
+     */
+    dropZone.addEventListener('dragleave', () => { 
+        dropZone.classList.remove('drag-over'); 
+    });
+    
+    /**
+     * Drop event - handle dropped files
+     */
+    dropZone.addEventListener('drop', (e) => { 
+        e.preventDefault(); 
+        dropZone.classList.remove('drag-over'); 
+        handleFiles(e.dataTransfer.files); 
+    });
+    
+    /**
+     * File input change event - handle selected files
+     */
+    fileInput.addEventListener('change', (e) => { 
+        handleFiles(e.target.files); 
+    });
 
-    // Event Listeners (Unchanged)
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
-    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
-    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
-
+    /**
+     * Process and validate dropped/selected files
+     * @param {FileList} files - The files to process
+     */
     function handleFiles(files) {
         for (const file of files) {
+            // Create unique identifier for duplicate detection
             const fileIdentifier = `${file.name}-${file.size}`;
-            if (file.type !== 'application/pdf') { alert(`'${file.name}' is not a PDF and will be ignored.`); continue; }
-            if (addedFiles.has(fileIdentifier)) { alert(`'${file.name}' has already been added.`); continue; }
+            
+            // Validate file type (PDF only)
+            if (file.type !== 'application/pdf') { 
+                alert(`'${file.name}' is not a PDF and will be ignored.`); 
+                continue; 
+            }
+            
+            // Check for duplicates
+            if (addedFiles.has(fileIdentifier)) { 
+                alert(`'${file.name}' has already been added.`); 
+                continue; 
+            }
+            
+            // Create form card for this file
             const card = createFormCard(file);
             formsWrapper.appendChild(card);
             addedFiles.set(fileIdentifier, { file: file, card: card, uploaded: false });
         }
     }
 
+    /**
+     * Create a form card for a single file
+     * @param {File} file - The file to create a form for
+     * @returns {HTMLElement} The created form card element
+     */
     function createFormCard(file) {
         const card = document.createElement('div');
         card.className = 'form-card';
+        
+        // Generate comprehensive form HTML with all required and optional fields
         card.innerHTML = `
             <h3 title="${file.name}">${file.name}</h3>
             <div class="status-indicator">Pending</div>
@@ -50,10 +121,24 @@ document.addEventListener('DOMContentLoaded', function () {
         return card;
     }
 
+    /**
+     * Validate that all required fields in a form card are filled
+     * @param {HTMLElement} card - The form card to validate
+     * @returns {boolean} True if valid, false otherwise
+     */
     function validateForm(card) {
         const requiredInputs = card.querySelectorAll('[required]');
         let isValid = true;
-        for (const input of requiredInputs) { if (!input.value) { isValid = false; break; } }
+        
+        // Check if all required fields have values
+        for (const input of requiredInputs) { 
+            if (!input.value) { 
+                isValid = false; 
+                break; 
+            } 
+        }
+        
+        // Show error indicator if validation fails
         if (!isValid) {
             const statusIndicator = card.querySelector('.status-indicator');
             statusIndicator.textContent = '❌ Missing Info!';
@@ -62,58 +147,90 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             card.classList.remove('form-error');
         }
+        
         return isValid;
     }
 
+    /**
+     * Upload all pending files button click handler
+     * Validates and uploads each file sequentially
+     */
     uploadAllBtn.addEventListener('click', async () => {
         for (const [identifier, data] of addedFiles.entries()) {
+            // Only upload if not already uploaded and validation passes
             if (!data.uploaded && validateForm(data.card)) {
                 await uploadFile(data);
             }
         }
     });
 
+    /**
+     * Upload a single file with its metadata to the server
+     * @param {Object} data - Object containing file, card, and uploaded status
+     */
     async function uploadFile(data) {
         const { file, card } = data;
         const statusIndicator = card.querySelector('.status-indicator');
+        
+        // Update status to "Uploading"
         statusIndicator.textContent = 'Uploading...';
         statusIndicator.style.backgroundColor = '#f0ad4e';
 
+        // Prepare form data with file and all metadata
         const formData = new FormData();
         formData.append('file', file);
 
+        // Collect all input values from the form card
         const inputs = card.querySelectorAll('input, select');
-        for (const input of inputs) { formData.append(input.name, input.value); }
+        for (const input of inputs) { 
+            formData.append(input.name, input.value); 
+        }
 
         try {
+            // Send upload request with CSRF token for security
             const response = await fetch('/upload', {
                 method: 'POST',
                 body: formData,
-                // --- NEW: Send the CSRF Token in the header ---
                 headers: {
                     'X-CSRFToken': csrfToken
                 }
             });
 
             if (response.ok) {
+                // Upload successful
                 statusIndicator.textContent = '✅ Uploaded';
                 statusIndicator.style.backgroundColor = '#5cb85c';
                 data.uploaded = true;
             } else {
+                // Upload failed
                 statusIndicator.textContent = '❌ Failed';
                 statusIndicator.style.backgroundColor = '#d9534f';
             }
         } catch (error) {
+            // Network error
             console.error('Upload error:', error);
             statusIndicator.textContent = '❌ Network Error';
             statusIndicator.style.backgroundColor = '#d9534f';
         }
     }
 
+    /**
+     * Keyboard navigation for form cards
+     * Left/Right arrow keys scroll between cards
+     */
     document.addEventListener('keydown', (e) => {
-        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') { return; }
-        const scrollAmount = 420;
-        if (e.key === 'ArrowRight') { formsWrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' }); }
-        else if (e.key === 'ArrowLeft') { formsWrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); }
+        // Don't interfere with form input
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT') { 
+            return; 
+        }
+        
+        const scrollAmount = 420; // Width of one card plus gap
+        
+        if (e.key === 'ArrowRight') { 
+            formsWrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' }); 
+        }
+        else if (e.key === 'ArrowLeft') { 
+            formsWrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); 
+        }
     });
 });
