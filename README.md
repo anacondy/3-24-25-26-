@@ -67,6 +67,10 @@
 ![Login Page](https://github.com/user-attachments/assets/7a4274ca-8d41-4635-9679-09e0b69755be)
 *Secure admin authentication page*
 
+### Admin Upload Dashboard
+![Upload Dashboard](https://github.com/user-attachments/assets/b8d23baa-b232-460f-a077-1fbe3ac01414)
+*Multi-file upload interface with logout button for easy navigation*
+
 ---
 
 ## 🎨 Design System
