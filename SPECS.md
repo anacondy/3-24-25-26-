@@ -77,6 +77,8 @@ git clone [https://github.com/yourusername/terminal-archives.git](https://github
 cd terminal-archives
 
 
+### Project Structure 
+
 paper-archive-project/
 ├── app.py                 # Main Flask server & Logic
 ├── database.py            # Database initialization & helper functions
