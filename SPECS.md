@@ -76,6 +76,7 @@ The UI is built to mimic a modern, high-contrast code editor or terminal.
 git clone [https://github.com/yourusername/terminal-archives.git](https://github.com/yourusername/terminal-archives.git)
 cd terminal-archives
 
+---
 
 ### Project Structure 
 
