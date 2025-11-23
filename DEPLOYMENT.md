@@ -4,6 +4,26 @@ This guide provides detailed instructions for deploying Terminal Archives on var
 
 ---
 
+## ⚠️ CRITICAL: Absolute vs. Relative Paths for File Uploads
+
+**When deploying to WSGI servers (PythonAnywhere, Heroku, etc.), you MUST use absolute paths for the upload folder.**
+
+### The Problem
+- ❌ **WRONG:** `app.config['UPLOAD_FOLDER'] = 'uploads'`
+  - This uses a relative path which may save files to temporary folders that you cannot access
+  - On platforms like PythonAnywhere, this can cause uploaded files to be lost or inaccessible
+
+### The Solution
+- ✅ **CORRECT:** 
+```python
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads')
+```
+
+**This code is already implemented in `app.py`** - no changes needed! Just be aware of this when modifying the upload configuration.
+
+---
+
 ## Table of Contents
 1. [Local Development Setup](#local-development-setup)
 2. [Heroku Deployment](#heroku-deployment)
@@ -172,6 +192,8 @@ os.environ['SECRET_KEY'] = 'your-super-secret-key-here'
 # Import and run the Flask app
 from app import app as application
 ```
+
+**Note:** The application already uses absolute paths for uploads (`app.config['UPLOAD_FOLDER']`), so uploaded files will be saved to `/home/yourusername/terminal-archives/uploads/` and will persist correctly.
 
 6. **Set up static files:**
    - In "Web" tab, add static file mapping:

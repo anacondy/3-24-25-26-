@@ -29,12 +29,18 @@ app = Flask(__name__)
 # Configuration
 # IMPORTANT: For production, set SECRET_KEY as an environment variable for security
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-default-secret-key-for-local-development')
-app.config['UPLOAD_FOLDER'] = 'uploads'
+
+# CRITICAL: Use absolute paths for file uploads
+# This gets the directory where app.py is located
+basedir = os.path.abspath(os.path.dirname(__file__))
+# Join with 'uploads' to get the full, absolute path
+# This prevents files from being saved to inaccessible temp folders on WSGI servers
+app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'uploads')
 
 # Enable CSRF protection for all forms
 csrf = CSRFProtect(app)
 
-# Create uploads directory if it doesn't exist
+# Create uploads directory if it doesn't exist at the absolute path
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize database tables
