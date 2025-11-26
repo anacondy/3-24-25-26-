@@ -14,9 +14,11 @@
         .upload-container { border: 2px dashed var(--border-color); border-radius: 10px; padding: 2rem; text-align: center; color: #888; margin-bottom: 2rem; transition: background-color 0.3s, border-color 0.3s; }
         .upload-container.drag-over { background-color: var(--bg-color-2); border-color: var(--primary-color); }
         .upload-container p { font-size: 1.2rem; }
-        .upload-controls { text-align: center; margin-bottom: 2rem; }
+        .upload-controls { margin-bottom: 2rem; display: flex; justify-content: center; align-items: center; gap: 1rem; }
         #upload-all-btn { background-color: var(--primary-color); color: white; padding: 12px 25px; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background-color 0.3s; }
         #upload-all-btn:hover { background-color: #45a049; }
+        #logout-btn { background-color: #555; color: white; padding: 12px 25px; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background-color 0.3s; text-decoration: none; display: inline-block; }
+        #logout-btn:hover { background-color: #666; }
         #forms-wrapper { display: flex; gap: 1.5rem; padding-bottom: 1.5rem; overflow-x: auto; scroll-snap-type: x mandatory; }
         .form-card { background-color: var(--bg-color-3); padding: 1.5rem; border-radius: 8px; min-width: 400px; scroll-snap-align: start; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-left: 5px solid var(--border-color); transition: border-left-color 0.3s; }
         .form-card h3 { color: var(--primary-color); margin-top: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
@@ -39,6 +41,7 @@
     <!-- Upload controls -->
     <div class="upload-controls">
         <button id="upload-all-btn">Upload All Pending Files</button>
+        <a href="{{ url_for('logout') }}" id="logout-btn">Logout</a>
     </div>
 
     <!-- Container for dynamically generated form cards -->

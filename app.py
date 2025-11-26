@@ -104,6 +104,16 @@ def terminal_ui():
     return render_template('index.html')
 
 
+# Route: Offline Page
+@app.route('/offline')
+def offline():
+    """
+    Renders the offline page with animated GIF.
+    Displays when the site is offline or unavailable.
+    """
+    return render_template('offline.html')
+
+
 # Route: Admin Upload Dashboard
 @app.route('/admin')
 @login_required
